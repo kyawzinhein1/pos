@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import axios from "axios";
 
-const API_URL = "http://localhost:2200/transactions";
+const API_URL = "https://pos-1-nuq5.onrender.com/transactions";
 
 const useTransactionStore = create((set) => ({
   transactions: [],
