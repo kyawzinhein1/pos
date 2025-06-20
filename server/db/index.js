@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const DB_NAME = "pos";
+const DB_NAME = "test";
 
 export const connectDB = async () => {
     try {
