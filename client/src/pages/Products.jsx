@@ -54,7 +54,6 @@ const Products = () => {
 
   return (
     <section className="container mx-auto mt-4 px-4">
-      {/* {console.log("Products Page rendered.")} */}
       {/* Header Section */}
       <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-4">
         <h1 className="text-xl md:text-3xl font-bold text-center sm:text-left">

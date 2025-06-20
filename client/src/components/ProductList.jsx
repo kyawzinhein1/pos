@@ -4,7 +4,6 @@ import { Edit2Icon, TrashIcon } from "lucide-react";
 const ProductList = React.memo(({ products, onEdit, onRemove }) => {
   return (
     <div className="max-h-[388px] overflow-y-auto border border-gray-300 rounded-lg">
-      {console.log("Product List rendered.")}
       <div className="overflow-x-auto">
         <table className="w-full min-w-[1200px]">
           <thead className="bg-gray-100">

@@ -5,36 +5,40 @@ const Breadcrumbs = () => {
   const location = useLocation();
   const pathnames = location.pathname.split("/").filter((x) => x);
 
-  // Hide breadcrumbs on the home page
   if (pathnames.length === 0) return null;
 
   return (
-    <nav className="text-gray-600 text-sm mt-3">
-      <ol className="flex flex-wrap items-center space-x-2 text-sm sm:text-base px-4 py-2">
-        <li>
+    <nav className="w-full px-4 py-2 mt-6 mb-2">
+      <ol className="flex flex-wrap items-center text-sm sm:text-base text-gray-600">
+        <li className="flex items-center">
           <Link
             to="/"
-            className="text-blue-500 hover:text-blue-700 transition-colors duration-200"
+            className="text-blue-500 hover:text-blue-700 transition-colors flex items-center gap-1"
           >
             <Home className="w-4 h-4" />
+            <span className="hidden sm:inline">Home</span>
           </Link>
         </li>
         {pathnames.map((name, index) => {
           const routeTo = `/${pathnames.slice(0, index + 1).join("/")}`;
           const isLast = index === pathnames.length - 1;
+          const displayName = name
+            .replace(/-/g, " ")
+            .replace(/\b\w/g, (c) => c.toUpperCase());
+
           return (
             <li key={name} className="flex items-center">
               <span className="mx-2 text-gray-400">/</span>
               {isLast ? (
-                <span className="text-gray-500 font-medium capitalize">
-                  {name.replace("-", " ")}
+                <span className="text-gray-800 font-semibold">
+                  {displayName}
                 </span>
               ) : (
                 <Link
                   to={routeTo}
-                  className="text-blue-500 hover:text-blue-700 transition-colors duration-200 capitalize"
+                  className="text-blue-500 hover:text-blue-700 transition-colors"
                 >
-                  {name.replace("-", " ")}
+                  {displayName}
                 </Link>
               )}
             </li>
