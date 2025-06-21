@@ -1,7 +1,9 @@
 import { create } from "zustand";
 import axios from "axios";
 
-const API_URL = "https://pos-1-nuq5.onrender.com/products";
+const BASE_URL = import.meta.env.API_URL;
+
+const API_URL = `${BASE_URL}/products`;
 
 const useSaleStore = create((set) => ({
     selectedProducts: [],

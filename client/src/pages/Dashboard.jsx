@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { Package, DollarSign, AlertTriangle } from "lucide-react";
 
+const BASE_URL = import.meta.env.API_URL;
+
 const Dashboard = () => {
   const [products, setProducts] = useState([]);
   const [transactions, setTransactions] = useState([]);
@@ -10,7 +12,7 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await axios.get("http://localhost:2200/products");
+        const response = await axios.get(`${BASE_URL}/products`);
         setProducts(response.data);
       } catch (error) {
         console.error("Error fetching products:", error);
@@ -19,7 +21,7 @@ const Dashboard = () => {
 
     const fetchTransactions = async () => {
       try {
-        const response = await axios.get("http://localhost:2200/transactions");
+        const response = await axios.get(`${BASE_URL}/transactions`);
         setTransactions(response.data);
         const revenue = response.data.reduce((sum, trx) => sum + trx.total, 0);
         setTotalRevenue(revenue);

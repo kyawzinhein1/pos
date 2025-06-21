@@ -1,7 +1,9 @@
 import { create } from "zustand";
 import axios from "axios";
 
-const API_URL = "https://pos-1-nuq5.onrender.com/products";
+const BASE_URL = import.meta.env.API_URL;
+
+const API_URL = `${BASE_URL}/products`;
 
 const useProductStore = create((set) => ({
     products: [],
@@ -23,23 +25,22 @@ const useProductStore = create((set) => ({
             const response = await axios.post(API_URL, productData);
             console.log("Product added:", response.data);
         } catch (error) {
-            console.error("Error adding product:", error);  // Log full error object
+            console.error("Error adding product:", error); // Log full error object
 
             if (error.response) {
-                console.error("Error Response:", error.response);  // Log full response error
+                console.error("Error Response:", error.response); // Log full response error
                 if (error.response.status === 400) {
-                    alert(error.response.data.message);  // Show alert if fields are missing
+                    alert(error.response.data.message); // Show alert if fields are missing
                 } else if (error.response.status === 409) {
-                    alert("Product name already exists!");  // Alert when product name already exists
+                    alert("Product name already exists!"); // Alert when product name already exists
                 }
             } else if (error.request) {
-                console.error("Error Request:", error.request);  // Log request error if no response
+                console.error("Error Request:", error.request); // Log request error if no response
             } else {
-                console.error("Error Message:", error.message);  // Log message error
+                console.error("Error Message:", error.message); // Log message error
             }
         }
     },
-
 
     // Edit an existing product
     editProduct: async (_id, updatedProduct) => {
@@ -100,8 +101,9 @@ const useProductStore = create((set) => ({
 
             // Update Zustand state
             set((state) => ({
-                products: state.products.map((product) =>
-                    updatedProducts.find((p) => p._id === product._id) || product
+                products: state.products.map(
+                    (product) =>
+                        updatedProducts.find((p) => p._id === product._id) || product
                 ),
             }));
         } catch (error) {
