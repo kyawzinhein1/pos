@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { Package, DollarSign, AlertTriangle } from "lucide-react";
 
-const BASE_URL = import.meta.env.API_URL;
+const BASE_URL = import.meta.env.VITE_API_URL;
 
 const Dashboard = () => {
   const [products, setProducts] = useState([]);
