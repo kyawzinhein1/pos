@@ -7,12 +7,25 @@ const API_URL = `${BASE_URL}/transactions`;
 
 const useTransactionStore = create((set) => ({
   transactions: [],
+  total: 0,
+  totalPages: 0,
+  page: 1,
+  limit: 10,
 
   // fetch transaction
-  fetchTransactions: async () => {
+  fetchTransactions: async (page = 1, limit = 10, searchTerm = "", startDate = "", endDate = "") => {
     try {
-      const response = await axios.get(API_URL);
-      set({ transactions: response.data });
+      const params = new URLSearchParams({
+        page,
+        limit,
+        ...(searchTerm && { searchTerm }), // <-- use searchTerm as key
+        ...(startDate && { startDate }),
+        ...(endDate && { endDate }),
+      });
+      const response = await axios.get(`${API_URL}?${params.toString()}`);
+      // Destructure paginated response
+      const { transactions, total, totalPages } = response.data;
+      set({ transactions, total, totalPages, page, limit });
     } catch (error) {
       console.error("Error fetching transactions", error);
     }

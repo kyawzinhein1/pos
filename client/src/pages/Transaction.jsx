@@ -5,7 +5,8 @@ import TransactionDetail from "../components/TransactionDetail";
 import * as XLSX from "xlsx";
 
 const Transactions = () => {
-  const { transactions, fetchTransactions } = useTransactionStore();
+  const { transactions, fetchTransactions, totalPages, page, limit, total } =
+    useTransactionStore();
 
   const [selectedTransaction, setSelectedTransaction] = useState(null);
   const [showDetail, setShowDetail] = useState(false);
@@ -13,52 +14,34 @@ const Transactions = () => {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const transactionsPerPage = 10;
 
   useEffect(() => {
-    fetchTransactions();
-  }, []);
+    fetchTransactions(currentPage, limit, searchTerm, startDate, endDate);
+  }, [currentPage, limit]);
+
+  const handleSearch = () => {
+    setCurrentPage(1);
+    fetchTransactions(1, limit, searchTerm, startDate, endDate);
+  };
 
   const handleDetailShow = (transaction) => {
     setSelectedTransaction(transaction);
     setShowDetail(true);
   };
 
-  const filteredTransactions = transactions.filter((transaction) => {
-    const matchesSearchTerm = (transaction.transactionId || "").includes(
-      searchTerm
-    );
-    const transactionDate = new Date(transaction.date);
-
-    const isWithinDateRange =
-      (!startDate || transactionDate >= new Date(startDate)) &&
-      (!endDate || transactionDate <= new Date(endDate));
-
-    return matchesSearchTerm && isWithinDateRange;
-  });
-
-  const totalPages = Math.ceil(
-    filteredTransactions.length / transactionsPerPage
-  );
-  const startIndex = (currentPage - 1) * transactionsPerPage;
-  const paginatedTransactions = filteredTransactions.slice(
-    startIndex,
-    startIndex + transactionsPerPage
-  );
-
   const goToPage = (page) => {
     if (page >= 1 && page <= totalPages) setCurrentPage(page);
   };
 
   const exportToExcel = () => {
-    if (filteredTransactions.length === 0) {
+    if (transactions.length === 0) {
       alert("No transactions found to export!");
       return;
     }
 
     const worksheet = XLSX.utils.json_to_sheet(
-      filteredTransactions.map((transaction, index) => ({
-        No: index + 1,
+      transactions.map((transaction, index) => ({
+        No: (currentPage - 1) * limit + index + 1,
         "Transaction ID": transaction.transactionId,
         Products: transaction.products
           ? transaction.products
@@ -72,8 +55,8 @@ const Transactions = () => {
     );
 
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Filtered Transactions");
-    XLSX.writeFile(workbook, "filtered_transactions.xlsx");
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Transactions");
+    XLSX.writeFile(workbook, "transactions.xlsx");
   };
 
   return (
@@ -100,20 +83,41 @@ const Transactions = () => {
           />
         </div>
         <div className="flex flex-col w-full sm:w-auto">
-          <label className="text-sm font-medium">Search ...</label>
+          <label className="text-sm font-medium">Search by Trxn Id ...</label>
           <input
             type="text"
-            placeholder="Search..."
+            placeholder="Enter Trxn Id..."
             value={searchTerm}
-            onChange={(e) => {
-              setSearchTerm(e.target.value);
-              setCurrentPage(1);
-            }}
+            onChange={(e) => setSearchTerm(e.target.value)}
             className="border px-3 py-2 w-full max-w-sm rounded-md focus:ring-2 focus:ring-blue-400"
           />
         </div>
         <div className="flex flex-col w-auto">
-          <label className="text-sm font-medium">Export</label>
+          <label className="text-sm font-medium"> </label>
+          <button
+            onClick={handleSearch}
+            className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+          >
+            Search
+          </button>
+        </div>
+        <div className="flex flex-col w-auto">
+          <label className="text-sm font-medium">&nbsp;</label>
+          <button
+            onClick={() => {
+              setSearchTerm("");
+              setStartDate("");
+              setEndDate("");
+              setCurrentPage(1);
+              fetchTransactions(1, limit, "", "", "");
+            }}
+            className="bg-gray-400 text-white px-4 py-2 rounded-md hover:bg-gray-500"
+          >
+            Reset
+          </button>
+        </div>
+        <div className="flex flex-col w-auto">
+          <label className="text-sm font-medium">&nbsp;</label>
           <button
             onClick={exportToExcel}
             className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600"
@@ -137,20 +141,20 @@ const Transactions = () => {
             </tr>
           </thead>
           <tbody>
-            {paginatedTransactions.length === 0 ? (
+            {transactions.length === 0 ? (
               <tr>
                 <td colSpan="7" className="text-center text-red-600 py-4">
                   No transactions found
                 </td>
               </tr>
             ) : (
-              paginatedTransactions.map((transaction, index) => (
+              transactions.map((transaction, index) => (
                 <tr
                   key={transaction.transactionId}
                   className="border text-sm md:text-base"
                 >
                   <td className="px-2 py-2 text-center">
-                    {startIndex + index + 1}
+                    {(currentPage - 1) * limit + index + 1}
                   </td>
                   <td className="py-2 text-center">
                     {transaction.transactionId}
@@ -181,6 +185,8 @@ const Transactions = () => {
         </table>
       </div>
 
+      {console.log("transaction dates:", transactions[0]?.date)}
+
       {totalPages > 1 && (
         <div className="flex flex-wrap justify-center items-center gap-2 my-6">
           <button
@@ -197,6 +203,9 @@ const Transactions = () => {
           >
             &lt;
           </button>
+          <span className="px-3 py-2">
+            {currentPage} / {totalPages}
+          </span>
           <button
             onClick={() => goToPage(currentPage + 1)}
             disabled={currentPage === totalPages}

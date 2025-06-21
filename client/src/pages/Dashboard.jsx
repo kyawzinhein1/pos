@@ -1,38 +1,26 @@
-import { useEffect, useState } from "react";
-import axios from "axios";
+import { useEffect, useMemo } from "react";
 import { Package, DollarSign, AlertTriangle } from "lucide-react";
-
-const BASE_URL = import.meta.env.VITE_API_URL;
+import useTransactionStore from "../store/transactions";
+import useProductStore from "../store/product";
 
 const Dashboard = () => {
-  const [products, setProducts] = useState([]);
-  const [transactions, setTransactions] = useState([]);
-  const [totalRevenue, setTotalRevenue] = useState(0);
+  const { transactions, fetchTransactions } = useTransactionStore();
+  const { products, fetchProducts } = useProductStore();
 
   useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const response = await axios.get(`${BASE_URL}/products`);
-        setProducts(response.data);
-      } catch (error) {
-        console.error("Error fetching products:", error);
-      }
-    };
-
-    const fetchTransactions = async () => {
-      try {
-        const response = await axios.get(`${BASE_URL}/transactions`);
-        setTransactions(response.data);
-        const revenue = response.data.reduce((sum, trx) => sum + trx.total, 0);
-        setTotalRevenue(revenue);
-      } catch (error) {
-        console.error("Error fetching transactions:", error);
-      }
-    };
-
     fetchProducts();
     fetchTransactions();
-  }, []);
+  }, [fetchProducts, fetchTransactions]);
+
+  // Calculate total revenue
+  const totalRevenue = useMemo(
+    () =>
+      transactions.reduce(
+        (sum, transaction) => sum + (Number(transaction.total) || 0),
+        0
+      ),
+    [transactions]
+  );
 
   const lowStockProducts = products.filter((p) => p.stock <= 10);
 
